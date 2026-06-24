@@ -1,0 +1,909 @@
+[
+  {
+    "candidate_id": "CAND_0000001",
+    "profile": {
+      "anonymized_name": "Ira Vora",
+      "headline": "Backend Engineer | SQL, Spark, Cloud",
+      "summary": "Software / data professional with 6.9 years of experience building data pipelines, backend systems, and analytics infrastructure. I'm a backend/data hybrid — Spark, Airflow, SQL warehouses are home territory; I'm building competence on the ML side. My toolkit is solid on the data engineering side — Python, SQL, Spark, Airflow, warehouse design — and I've completed a couple of self-directed ML projects (Kaggle competitions, side projects fine-tuning small models). Interested in transitioning toward more AI/ML-focused work, ideally at a company where I can leverage my existing data-infra skills while learning modern ML practice.",
+      "location": "Toronto",
+      "country": "Canada",
+      "years_of_experience": 6.9,
+      "current_title": "Backend Engineer",
+      "current_company": "Mindtree",
+      "current_company_size": "10001+",
+      "current_industry": "IT Services"
+    },
+    "career_history": [
+      {
+        "company": "Mindtree",
+        "title": "Backend Engineer",
+        "start_date": "2024-03-08",
+        "end_date": null,
+        "duration_months": 27,
+        "is_current": true,
+        "industry": "IT Services",
+        "company_size": "10001+",
+        "description": "Implemented streaming data pipelines on Kafka and Spark Streaming for a real-time user-activity processing platform. Designed the schema-registry integration, the watermark/state management approach, and the deduplication logic for late-arriving events. Worked closely with the data science team to make sure feature pipelines aligned with what their models needed. Most of my career has been data engineering, with some adjacent ML exposure."
+      },
+      {
+        "company": "Dunder Mifflin",
+        "title": "Analytics Engineer",
+        "start_date": "2019-07-03",
+        "end_date": "2024-01-08",
+        "duration_months": 55,
+        "is_current": false,
+        "industry": "Paper Products",
+        "company_size": "201-500",
+        "description": "Built and maintained data pipelines on Apache Airflow processing ~500GB of daily transactional data across 12 source systems. Worked extensively with Spark (PySpark) for batch processing and dbt for the transformation/modeling layer in our Snowflake warehouse. Owned the on-call rotation for data quality issues — wrote most of the data quality checks that detect schema drift and unusual volume changes. The pipeline supports the analytics team and a few internal ML models."
+      }
+    ],
+    "education": [
+      {
+        "institution": "Lovely Professional University",
+        "degree": "B.E.",
+        "field_of_study": "Computer Science",
+        "start_year": 2017,
+        "end_year": 2020,
+        "grade": "8.24 CGPA",
+        "tier": "tier_3"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Tailwind",
+        "proficiency": "intermediate",
+        "endorsements": 3,
+        "duration_months": 13
+      },
+      {
+        "name": "NLP",
+        "proficiency": "advanced",
+        "endorsements": 37,
+        "duration_months": 26
+      },
+      {
+        "name": "Image Classification",
+        "proficiency": "advanced",
+        "endorsements": 7,
+        "duration_months": 40
+      },
+      {
+        "name": "Fine-tuning LLMs",
+        "proficiency": "advanced",
+        "endorsements": 21,
+        "duration_months": 36
+      },
+      {
+        "name": "Weights & Biases",
+        "proficiency": "intermediate",
+        "endorsements": 13,
+        "duration_months": 30
+      },
+      {
+        "name": "Speech Recognition",
+        "proficiency": "advanced",
+        "endorsements": 52,
+        "duration_months": 33
+      },
+      {
+        "name": "Photoshop",
+        "proficiency": "intermediate",
+        "endorsements": 8,
+        "duration_months": 24
+      },
+      {
+        "name": "TTS",
+        "proficiency": "advanced",
+        "endorsements": 56,
+        "duration_months": 60
+      },
+      {
+        "name": "LoRA",
+        "proficiency": "intermediate",
+        "endorsements": 0,
+        "duration_months": 28
+      },
+      {
+        "name": "Apache Beam",
+        "proficiency": "intermediate",
+        "endorsements": 4,
+        "duration_months": 9
+      },
+      {
+        "name": "AWS",
+        "proficiency": "beginner",
+        "endorsements": 5,
+        "duration_months": 8
+      },
+      {
+        "name": "Flask",
+        "proficiency": "beginner",
+        "endorsements": 15,
+        "duration_months": 15
+      },
+      {
+        "name": "BentoML",
+        "proficiency": "intermediate",
+        "endorsements": 3,
+        "duration_months": 36
+      },
+      {
+        "name": "Milvus",
+        "proficiency": "advanced",
+        "endorsements": 40,
+        "duration_months": 35
+      },
+      {
+        "name": "GANs",
+        "proficiency": "advanced",
+        "endorsements": 12,
+        "duration_months": 19
+      },
+      {
+        "name": "Statistical Modeling",
+        "proficiency": "intermediate",
+        "endorsements": 9,
+        "duration_months": 8
+      },
+      {
+        "name": "GCP",
+        "proficiency": "beginner",
+        "endorsements": 7,
+        "duration_months": 2
+      }
+    ],
+    "certifications": [],
+    "languages": [
+      {
+        "language": "English",
+        "proficiency": "professional"
+      },
+      {
+        "language": "Hindi",
+        "proficiency": "conversational"
+      }
+    ],
+    "redrob_signals": {
+      "profile_completeness_score": 86.9,
+      "signup_date": "2025-10-16",
+      "last_active_date": "2026-05-20",
+      "open_to_work_flag": true,
+      "profile_views_received_30d": 23,
+      "applications_submitted_30d": 2,
+      "recruiter_response_rate": 0.34,
+      "avg_response_time_hours": 177.8,
+      "skill_assessment_scores": {
+        "NLP": 38.8,
+        "Image Classification": 64.8,
+        "Fine-tuning LLMs": 41.6,
+        "Speech Recognition": 53.7
+      },
+      "connection_count": 356,
+      "endorsements_received": 35,
+      "notice_period_days": 60,
+      "expected_salary_range_inr_lpa": {
+        "min": 18.7,
+        "max": 36.1
+      },
+      "preferred_work_mode": "onsite",
+      "willing_to_relocate": false,
+      "github_activity_score": 9.2,
+      "search_appearance_30d": 249,
+      "saved_by_recruiters_30d": 4,
+      "interview_completion_rate": 0.71,
+      "offer_acceptance_rate": 0.58,
+      "verified_email": true,
+      "verified_phone": true,
+      "linkedin_connected": false
+    }
+  },
+  {
+    "candidate_id": "CAND_0000002",
+    "profile": {
+      "anonymized_name": "Saanvi Sethi",
+      "headline": "Operations Manager | 12.5+ yrs experience",
+      "summary": "Professional with 12.5+ years of experience. My professional background is in marketing manager — I've built and led teams, owned KPIs, and driven business outcomes in this domain. Lately I've been curious about how AI tools could augment my work — I've experimented with ChatGPT and a few other tools for productivity and content creation, and I think the space is exciting. Open to roles where I can apply my domain expertise alongside emerging AI capabilities.",
+      "location": "Chennai, Tamil Nadu",
+      "country": "India",
+      "years_of_experience": 12.5,
+      "current_title": "Operations Manager",
+      "current_company": "Wipro",
+      "current_company_size": "10001+",
+      "current_industry": "IT Services"
+    },
+    "career_history": [
+      {
+        "company": "Wipro",
+        "title": "Operations Manager",
+        "start_date": "2022-11-14",
+        "end_date": null,
+        "duration_months": 43,
+        "is_current": true,
+        "industry": "IT Services",
+        "company_size": "10001+",
+        "description": "Customer support team lead at a SaaS product. Managed a team of 8 support agents handling tier-1 and tier-2 tickets; owned the escalation process to engineering and the customer-feedback loop to product. Built out the support knowledge base and the agent training program. Strong on the people-management side and the process side; lighter on technical depth beyond product expertise."
+      },
+      {
+        "company": "Wipro",
+        "title": "Operations Manager",
+        "start_date": "2021-09-13",
+        "end_date": "2022-11-07",
+        "duration_months": 14,
+        "is_current": false,
+        "industry": "IT Services",
+        "company_size": "10001+",
+        "description": "Mechanical engineering design role at a hardware-product company. Led the design of two product subsystems through full lifecycle: concept, DFM/DFMA review, prototype, production tooling. Comfortable with CAD (SolidWorks, Creo), FEA (ANSYS), and the typical hardware-development cadence. Worked closely with manufacturing partners on production scale-up."
+      },
+      {
+        "company": "Acme Corp",
+        "title": "Marketing Manager",
+        "start_date": "2017-03-08",
+        "end_date": "2021-08-14",
+        "duration_months": 54,
+        "is_current": false,
+        "industry": "Manufacturing",
+        "company_size": "201-500",
+        "description": "Content writing and SEO strategy for a tech-focused publication. Wrote longform articles on developer tools, cloud platforms, and AI/ML topics — including some that ranked on the first page of search for high-competition keywords. Managed a freelance writer pool and the editorial calendar. Recent work has been on AI-assisted content production, using LLM tools for research, drafting, and editing while maintaining editorial quality."
+      },
+      {
+        "company": "Dunder Mifflin",
+        "title": "Marketing Manager",
+        "start_date": "2014-01-23",
+        "end_date": "2017-03-08",
+        "duration_months": 38,
+        "is_current": false,
+        "industry": "Paper Products",
+        "company_size": "201-500",
+        "description": "Brand design and creative direction at a consumer-products company. Owned brand identity (logo, visual system, typography), packaging design, and digital creative across web and social. Led the recent rebrand and managed a small external agency for production work. Comfortable across the Adobe suite, Figma, and the production side of brand and packaging design."
+      }
+    ],
+    "education": [
+      {
+        "institution": "Local Engineering College",
+        "degree": "B.Sc",
+        "field_of_study": "Mathematics",
+        "start_year": 2007,
+        "end_year": 2011,
+        "grade": "77%",
+        "tier": "tier_4"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Project Management",
+        "proficiency": "intermediate",
+        "endorsements": 14,
+        "duration_months": 23
+      },
+      {
+        "name": "React",
+        "proficiency": "intermediate",
+        "endorsements": 6,
+        "duration_months": 35
+      },
+      {
+        "name": "Photoshop",
+        "proficiency": "intermediate",
+        "endorsements": 9,
+        "duration_months": 35
+      },
+      {
+        "name": "TypeScript",
+        "proficiency": "beginner",
+        "endorsements": 2,
+        "duration_months": 3
+      },
+      {
+        "name": "Marketing",
+        "proficiency": "beginner",
+        "endorsements": 9,
+        "duration_months": 11
+      },
+      {
+        "name": "Kafka",
+        "proficiency": "intermediate",
+        "endorsements": 3,
+        "duration_months": 16
+      },
+      {
+        "name": "JavaScript",
+        "proficiency": "beginner",
+        "endorsements": 9,
+        "duration_months": 3
+      },
+      {
+        "name": "Feature Engineering",
+        "proficiency": "intermediate",
+        "endorsements": 11,
+        "duration_months": 27
+      },
+      {
+        "name": "GCP",
+        "proficiency": "intermediate",
+        "endorsements": 7,
+        "duration_months": 30
+      }
+    ],
+    "certifications": [],
+    "languages": [
+      {
+        "language": "English",
+        "proficiency": "professional"
+      },
+      {
+        "language": "Hindi",
+        "proficiency": "conversational"
+      }
+    ],
+    "redrob_signals": {
+      "profile_completeness_score": 78.7,
+      "signup_date": "2025-07-28",
+      "last_active_date": "2025-11-12",
+      "open_to_work_flag": true,
+      "profile_views_received_30d": 7,
+      "applications_submitted_30d": 1,
+      "recruiter_response_rate": 0.27,
+      "avg_response_time_hours": 30.2,
+      "connection_count": 538,
+      "endorsements_received": 21,
+      "notice_period_days": 60,
+      "expected_salary_range_inr_lpa": {
+        "min": 12.3,
+        "max": 8.5
+      },
+      "preferred_work_mode": "remote",
+      "willing_to_relocate": false,
+      "github_activity_score": -1,
+      "search_appearance_30d": 107,
+      "saved_by_recruiters_30d": 10,
+      "interview_completion_rate": 0.62,
+      "offer_acceptance_rate": -1,
+      "verified_email": false,
+      "verified_phone": false,
+      "linkedin_connected": true
+    }
+  },
+  {
+    "candidate_id": "CAND_0000003",
+    "profile": {
+      "anonymized_name": "Ved Sen",
+      "headline": "Business Analyst | 14.3+ yrs experience",
+      "summary": "Professional with 14.3+ years of experience. I've spent my career in marketing manager roles, mostly focused on driving outcomes through process, people, and customer relationships. Lately I've been curious about how AI tools could augment my work — I've experimented with ChatGPT and a few other tools for productivity and content creation, and I think the space is exciting. Open to roles where I can apply my domain expertise alongside emerging AI capabilities.",
+      "location": "Dubai",
+      "country": "UAE",
+      "years_of_experience": 14.3,
+      "current_title": "Business Analyst",
+      "current_company": "Stark Industries",
+      "current_company_size": "1001-5000",
+      "current_industry": "Manufacturing"
+    },
+    "career_history": [
+      {
+        "company": "Stark Industries",
+        "title": "Business Analyst",
+        "start_date": "2022-03-19",
+        "end_date": null,
+        "duration_months": 51,
+        "is_current": true,
+        "industry": "Manufacturing",
+        "company_size": "1001-5000",
+        "description": "Business analyst at a consulting firm, working primarily with retail and CPG clients. Conducted business diagnostics, process re-engineering work, and digital transformation strategy projects. Strong on stakeholder management, structured problem-solving, and the typical consulting toolkit (slide-craft, Excel modeling, executive communication). Recent project work involved AI-strategy advisory but my own technical depth in AI is limited."
+      },
+      {
+        "company": "Initech",
+        "title": "Civil Engineer",
+        "start_date": "2019-08-18",
+        "end_date": "2022-03-05",
+        "duration_months": 31,
+        "is_current": false,
+        "industry": "Software",
+        "company_size": "51-200",
+        "description": "Operations management role at a logistics company. Owned daily fulfillment operations across 3 warehouses, managing a team of 80 across receiving, picking, packing, and outbound. Built and tracked the operational KPIs (on-time fulfillment, accuracy, cost per order) and led the continuous improvement initiatives that drove a 22% productivity gain over 18 months."
+      },
+      {
+        "company": "Stark Industries",
+        "title": "Content Writer",
+        "start_date": "2016-01-06",
+        "end_date": "2019-08-18",
+        "duration_months": 44,
+        "is_current": false,
+        "industry": "Manufacturing",
+        "company_size": "1001-5000",
+        "description": "Operations management role at a logistics company. Owned daily fulfillment operations across 3 warehouses, managing a team of 80 across receiving, picking, packing, and outbound. Built and tracked the operational KPIs (on-time fulfillment, accuracy, cost per order) and led the continuous improvement initiatives that drove a 22% productivity gain over 18 months."
+      },
+      {
+        "company": "Hooli",
+        "title": "Mechanical Engineer",
+        "start_date": "2013-07-20",
+        "end_date": "2016-01-06",
+        "duration_months": 30,
+        "is_current": false,
+        "industry": "Software",
+        "company_size": "1001-5000",
+        "description": "Marketing leadership role at a B2B SaaS company. Owned the demand-generation function — content marketing, paid acquisition, SEO, email nurture. Built and managed a team of 5 across content, performance marketing, and marketing operations. Worked closely with sales on lead-quality definitions and the SDR-handoff process. Recent focus has been on account-based marketing for our enterprise segment."
+      },
+      {
+        "company": "Acme Corp",
+        "title": "HR Manager",
+        "start_date": "2012-04-26",
+        "end_date": "2013-06-20",
+        "duration_months": 14,
+        "is_current": false,
+        "industry": "Manufacturing",
+        "company_size": "201-500",
+        "description": "Brand design and creative direction at a consumer-products company. Owned brand identity (logo, visual system, typography), packaging design, and digital creative across web and social. Led the recent rebrand and managed a small external agency for production work. Comfortable across the Adobe suite, Figma, and the production side of brand and packaging design."
+      }
+    ],
+    "education": [
+      {
+        "institution": "Tier-3 Engineering College",
+        "degree": "B.Tech",
+        "field_of_study": "Machine Learning",
+        "start_year": 2001,
+        "end_year": 2005,
+        "grade": "69%",
+        "tier": "tier_4"
+      },
+      {
+        "institution": "Lovely Professional University",
+        "degree": "M.Tech",
+        "field_of_study": "Statistics",
+        "start_year": 2013,
+        "end_year": 2016,
+        "grade": "6.81 CGPA",
+        "tier": "tier_3"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Databricks",
+        "proficiency": "intermediate",
+        "endorsements": 12,
+        "duration_months": 32
+      },
+      {
+        "name": "Docker",
+        "proficiency": "intermediate",
+        "endorsements": 6,
+        "duration_months": 35
+      },
+      {
+        "name": "Flask",
+        "proficiency": "beginner",
+        "endorsements": 5,
+        "duration_months": 14
+      },
+      {
+        "name": "AWS",
+        "proficiency": "intermediate",
+        "endorsements": 2,
+        "duration_months": 33
+      },
+      {
+        "name": "Terraform",
+        "proficiency": "beginner",
+        "endorsements": 3,
+        "duration_months": 18
+      },
+      {
+        "name": "Tally",
+        "proficiency": "intermediate",
+        "endorsements": 14,
+        "duration_months": 24
+      },
+      {
+        "name": "TTS",
+        "proficiency": "intermediate",
+        "endorsements": 3,
+        "duration_months": 13
+      },
+      {
+        "name": "Apache Beam",
+        "proficiency": "intermediate",
+        "endorsements": 15,
+        "duration_months": 23
+      }
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Cloud Practitioner",
+        "issuer": "AWS",
+        "year": 2024
+      }
+    ],
+    "languages": [
+      {
+        "language": "English",
+        "proficiency": "native"
+      },
+      {
+        "language": "Hindi",
+        "proficiency": "professional"
+      }
+    ],
+    "redrob_signals": {
+      "profile_completeness_score": 25.6,
+      "signup_date": "2025-04-11",
+      "last_active_date": "2025-12-11",
+      "open_to_work_flag": false,
+      "profile_views_received_30d": 80,
+      "applications_submitted_30d": 6,
+      "recruiter_response_rate": 0.78,
+      "avg_response_time_hours": 107.1,
+      "skill_assessment_scores": {},
+      "connection_count": 503,
+      "endorsements_received": 13,
+      "notice_period_days": 30,
+      "expected_salary_range_inr_lpa": {
+        "min": 8.8,
+        "max": 14.2
+      },
+      "preferred_work_mode": "onsite",
+      "willing_to_relocate": false,
+      "github_activity_score": -1,
+      "search_appearance_30d": 178,
+      "saved_by_recruiters_30d": 1,
+      "interview_completion_rate": 0.82,
+      "offer_acceptance_rate": 0.19,
+      "verified_email": true,
+      "verified_phone": true,
+      "linkedin_connected": true
+    }
+  },
+  {
+    "candidate_id": "CAND_0000004",
+    "profile": {
+      "anonymized_name": "Ela Singh",
+      "headline": "Recommendation Systems Engineer | Search, Ranking & Retrieval",
+      "summary": "Machine learning engineer with 6.0 years of experience building ML-powered features in production. Strong background in NLP, recommendation systems, and applied AI; comfortable across the ML stack from feature engineering through deployment. Recently, I led the team that migrated our keyword-search-based product to embedding-based retrieval. I've learned that most retrieval problems are actually evaluation problems in disguise. My academic background is in CS/ML but my main learning has come from shipping real systems and seeing what holds up under production load. Open to senior IC roles in applied ML or AI engineering, ideally at product companies where I'd own a meaningful piece of the ML stack.",
+      "location": "Hyderabad, Telangana",
+      "country": "India",
+      "years_of_experience": 6.0,
+      "current_title": "Recommendation Systems Engineer",
+      "current_company": "Swiggy",
+      "current_company_size": "5001-10000",
+      "current_industry": "Food Delivery"
+    },
+    "career_history": [
+      {
+        "company": "Swiggy",
+        "title": "Recommendation Systems Engineer",
+        "start_date": "2025-04-02",
+        "end_date": null,
+        "duration_months": 14,
+        "is_current": true,
+        "industry": "Food Delivery",
+        "company_size": "5001-10000",
+        "description": "Trained and shipped multiple ranking models for our product's discovery feed using XGBoost and LightGBM. Designed features across three families: content metadata, user behavior signals, and item engagement history. Owned the offline-online correlation analysis that determined which offline metrics actually predicted A/B test outcomes. Worked closely with PMs to define the optimization target (click-through vs. dwell time vs. downstream conversion) — that work was as important as the modeling itself."
+      },
+      {
+        "company": "Mad Street Den",
+        "title": "Search Engineer",
+        "start_date": "2023-10-10",
+        "end_date": "2025-02-01",
+        "duration_months": 16,
+        "is_current": false,
+        "industry": "AI/ML",
+        "company_size": "201-500",
+        "description": "Trained and shipped multiple ranking models for our product's discovery feed using XGBoost and LightGBM. Designed features across three families: content metadata, user behavior signals, and item engagement history. Owned the offline-online correlation analysis that determined which offline metrics actually predicted A/B test outcomes. Worked closely with PMs to define the optimization target (click-through vs. dwell time vs. downstream conversion) — that work was as important as the modeling itself."
+      },
+      {
+        "company": "Uber",
+        "title": "NLP Engineer",
+        "start_date": "2021-07-22",
+        "end_date": "2023-10-10",
+        "duration_months": 27,
+        "is_current": false,
+        "industry": "Transportation",
+        "company_size": "10001+",
+        "description": "Trained and shipped multiple ranking models for our product's discovery feed using XGBoost and LightGBM. Designed features across three families: content metadata, user behavior signals, and item engagement history. Owned the offline-online correlation analysis that determined which offline metrics actually predicted A/B test outcomes. Worked closely with PMs to define the optimization target (click-through vs. dwell time vs. downstream conversion) — that work was as important as the modeling itself."
+      },
+      {
+        "company": "Zomato",
+        "title": "Applied ML Engineer",
+        "start_date": "2020-06-27",
+        "end_date": "2021-07-22",
+        "duration_months": 13,
+        "is_current": false,
+        "industry": "Food Delivery",
+        "company_size": "5001-10000",
+        "description": "Owned the ranking layer for an e-commerce search product, evolving it from a hand-tuned scoring function to a learning-to-rank model over 9 months. Designed the relevance labeling pipeline (mix of click-through data and explicit human judgments), the feature pipeline, and the training/eval workflow. Most of the work was infrastructure and data quality — the modeling part was almost the easy bit. Final model improved revenue-per-search by 12%."
+      }
+    ],
+    "education": [
+      {
+        "institution": "SRM University",
+        "degree": "M.Tech",
+        "field_of_study": "Computer Engineering",
+        "start_year": 2002,
+        "end_year": 2006,
+        "grade": "9.16 CGPA",
+        "tier": "tier_2"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Go",
+        "proficiency": "intermediate",
+        "endorsements": 7,
+        "duration_months": 19
+      },
+      {
+        "name": "MLflow",
+        "proficiency": "advanced",
+        "endorsements": 59,
+        "duration_months": 21
+      },
+      {
+        "name": "FAISS",
+        "proficiency": "advanced",
+        "endorsements": 19,
+        "duration_months": 35
+      },
+      {
+        "name": "Pinecone",
+        "proficiency": "expert",
+        "endorsements": 34,
+        "duration_months": 88
+      },
+      {
+        "name": "Angular",
+        "proficiency": "beginner",
+        "endorsements": 4,
+        "duration_months": 18
+      },
+      {
+        "name": "Image Classification",
+        "proficiency": "advanced",
+        "endorsements": 56,
+        "duration_months": 28
+      },
+      {
+        "name": "Machine Learning",
+        "proficiency": "advanced",
+        "endorsements": 43,
+        "duration_months": 23
+      },
+      {
+        "name": "Speech Recognition",
+        "proficiency": "intermediate",
+        "endorsements": 14,
+        "duration_months": 24
+      },
+      {
+        "name": "BentoML",
+        "proficiency": "intermediate",
+        "endorsements": 6,
+        "duration_months": 14
+      },
+      {
+        "name": "MLOps",
+        "proficiency": "intermediate",
+        "endorsements": 15,
+        "duration_months": 36
+      },
+      {
+        "name": "Embeddings",
+        "proficiency": "expert",
+        "endorsements": 48,
+        "duration_months": 60
+      },
+      {
+        "name": "Information Retrieval",
+        "proficiency": "expert",
+        "endorsements": 2,
+        "duration_months": 84
+      },
+      {
+        "name": "Hugging Face Transformers",
+        "proficiency": "expert",
+        "endorsements": 18,
+        "duration_months": 36
+      },
+      {
+        "name": "Feature Engineering",
+        "proficiency": "advanced",
+        "endorsements": 38,
+        "duration_months": 26
+      },
+      {
+        "name": "Sentence Transformers",
+        "proficiency": "expert",
+        "endorsements": 16,
+        "duration_months": 69
+      },
+      {
+        "name": "scikit-learn",
+        "proficiency": "advanced",
+        "endorsements": 41,
+        "duration_months": 60
+      },
+      {
+        "name": "Marketing",
+        "proficiency": "intermediate",
+        "endorsements": 11,
+        "duration_months": 36
+      }
+    ],
+    "certifications": [],
+    "languages": [
+      {
+        "language": "English",
+        "proficiency": "native"
+      },
+      {
+        "language": "Hindi",
+        "proficiency": "native"
+      }
+    ],
+    "redrob_signals": {
+      "profile_completeness_score": 83.4,
+      "signup_date": "2026-01-28",
+      "last_active_date": "2026-05-24",
+      "open_to_work_flag": true,
+      "profile_views_received_30d": 194,
+      "applications_submitted_30d": 2,
+      "recruiter_response_rate": 0.91,
+      "avg_response_time_hours": 76.1,
+      "skill_assessment_scores": {
+        "MLflow": 75.1,
+        "FAISS": 68.4,
+        "Pinecone": 53.6,
+        "Image Classification": 57.1
+      },
+      "connection_count": 832,
+      "endorsements_received": 177,
+      "notice_period_days": 60,
+      "expected_salary_range_inr_lpa": {
+        "min": 27.3,
+        "max": 60.2
+      },
+      "preferred_work_mode": "flexible",
+      "willing_to_relocate": true,
+      "github_activity_score": 32.6,
+      "search_appearance_30d": 778,
+      "saved_by_recruiters_30d": 13,
+      "interview_completion_rate": 0.6,
+      "offer_acceptance_rate": 0.38,
+      "verified_email": false,
+      "verified_phone": true,
+      "linkedin_connected": false
+    }
+  },
+  {
+    "candidate_id": "CAND_0000005",
+    "profile": {
+      "anonymized_name": "Aarav Kapoor",
+      "headline": "Data Engineer | Data pipelines & analytics",
+      "summary": "Software / data professional with 4.6 years of experience building data pipelines, backend systems, and analytics infrastructure. Most of my work has been data pipelines and analytics infrastructure; I've shipped a couple of small ML features but it's not the core of my day. My toolkit is solid on the data engineering side — Python, SQL, Spark, Airflow, warehouse design — and I've completed a couple of self-directed ML projects (Kaggle competitions, side projects fine-tuning small models). Interested in transitioning toward more AI/ML-focused work, ideally at a company where I can leverage my existing data-infra skills while learning modern ML practice.",
+      "location": "London",
+      "country": "UK",
+      "years_of_experience": 4.6,
+      "current_title": "Data Engineer",
+      "current_company": "Ola",
+      "current_company_size": "5001-10000",
+      "current_industry": "Transportation"
+    },
+    "career_history": [
+      {
+        "company": "Ola",
+        "title": "Data Engineer",
+        "start_date": "2021-11-19",
+        "end_date": null,
+        "duration_months": 55,
+        "is_current": true,
+        "industry": "Transportation",
+        "company_size": "5001-10000",
+        "description": "Mixed data science and analytics-engineering role at a marketing-analytics startup. Spent maybe 30% of my time on lightweight ML (clustering, classification, churn prediction in sklearn/XGBoost) and 70% on data infrastructure and dashboards. Comfortable with the modeling work but I wouldn't call myself an ML specialist. Built our experimentation framework that supports the product team's A/B tests."
+      }
+    ],
+    "education": [
+      {
+        "institution": "Generic State University",
+        "degree": "B.E.",
+        "field_of_study": "Mathematics",
+        "start_year": 2007,
+        "end_year": 2014,
+        "grade": "81%",
+        "tier": "tier_4"
+      },
+      {
+        "institution": "Georgia Tech",
+        "degree": "B.Sc",
+        "field_of_study": "Artificial Intelligence",
+        "start_year": 2013,
+        "end_year": 2017,
+        "grade": "7.81 CGPA",
+        "tier": "tier_1"
+      }
+    ],
+    "skills": [
+      {
+        "name": "gRPC",
+        "proficiency": "intermediate",
+        "endorsements": 9,
+        "duration_months": 11
+      },
+      {
+        "name": "SEO",
+        "proficiency": "beginner",
+        "endorsements": 8,
+        "duration_months": 18
+      },
+      {
+        "name": "Feature Engineering",
+        "proficiency": "advanced",
+        "endorsements": 4,
+        "duration_months": 42
+      },
+      {
+        "name": "Marketing",
+        "proficiency": "beginner",
+        "endorsements": 0,
+        "duration_months": 15
+      },
+      {
+        "name": "Data Pipelines",
+        "proficiency": "beginner",
+        "endorsements": 0,
+        "duration_months": 15
+      },
+      {
+        "name": "Kafka",
+        "proficiency": "beginner",
+        "endorsements": 7,
+        "duration_months": 13
+      },
+      {
+        "name": "Excel",
+        "proficiency": "intermediate",
+        "endorsements": 10,
+        "duration_months": 23
+      }
+    ],
+    "certifications": [],
+    "languages": [
+      {
+        "language": "English",
+        "proficiency": "professional"
+      },
+      {
+        "language": "Hindi",
+        "proficiency": "conversational"
+      }
+    ],
+    "redrob_signals": {
+      "profile_completeness_score": 81.6,
+      "signup_date": "2026-01-09",
+      "last_active_date": "2026-04-29",
+      "open_to_work_flag": false,
+      "profile_views_received_30d": 60,
+      "applications_submitted_30d": 13,
+      "recruiter_response_rate": 0.4,
+      "avg_response_time_hours": 19.0,
+      "skill_assessment_scores": {
+        "GANs": 53.3,
+        "OpenCV": 65.5,
+        "Prompt Engineering": 73.8,
+        "Object Detection": 81.3
+      },
+      "connection_count": 712,
+      "endorsements_received": 38,
+      "notice_period_days": 120,
+      "expected_salary_range_inr_lpa": {
+        "min": 18.3,
+        "max": 15.7
+      },
+      "preferred_work_mode": "flexible",
+      "willing_to_relocate": true,
+      "github_activity_score": -1,
+      "search_appearance_30d": 167,
+      "saved_by_recruiters_30d": 2,
+      "interview_completion_rate": 0.53,
+      "offer_acceptance_rate": -1,
+      "verified_email": true,
+      "verified_phone": true,
+      "linkedin_connected": false
+    }
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "name": "TalentMatch AI",
+  "description": "An AI-powered corporate recruiter platform that analyzes, ranks, and matches candidate profiles against custom Job Descriptions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
