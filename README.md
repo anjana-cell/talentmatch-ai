@@ -1,20 +1,22 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# TalentMatch AI 🚀
 
-# Run and deploy your AI Studio app
+**TalentMatch AI** is a production-ready, two-stage recruitment engine that replaces rigid keyword matching with deep semantic talent analysis. Built on the Gemini API ecosystem and deployed securely to Google Cloud Run, it evaluates actual engineering experience over surface-level text strings.
 
-This contains everything you need to run your app locally.
+## 🏆 What Makes It Unique
 
-View your app in AI Studio: https://ai.studio/apps/ae3ff409-67c8-4acf-ae47-10c3c4a99f91
+* **Two-Stage Hybrid Funnel:** It splits computational workloads efficiently. A high-speed vector embedding layer (`gemini-embedding-001`) instantly screens the entire dataset using Cosine Similarity, while a contextual LLM layer (`gemini-3.5-flash`) performs deep behavioral re-ranking on the top matches.
+* **Explainable AI (XAI):** It goes beyond blind percentages. The platform outputs structured JSON justifications, rendering custom **AI Recruiter Insights** that map hidden conceptual bridges (e.g., connecting "distributed data pipelines" to "database scalability").
+* **Production-Grade Resilience:** To handle heavy judging traffic, the backend implements an autonomous fault-tolerant loop. If the primary model experiences a traffic bottleneck, it instantly switches the payload to `gemini-3.1-flash-lite`, ensuring 100% application uptime.
+* **Zero-Trust Security:** The React UI is completely decoupled from the Node.js backend. Sensitive API credentials reside strictly in private server environment variables, preventing client-side exposure.
 
-## Run Locally
+---
 
-**Prerequisites:**  Node.js
+## 🛠️ Local Development Setup
 
+### Prerequisites
+Ensure you have **Node.js** installed on your machine.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### 1. Configure Environment Variables
+Navigate into your `backend/` directory and create a `.env` file:
+```env
+GEMINI_API_KEY=your_actual_gemini_api_key_here
