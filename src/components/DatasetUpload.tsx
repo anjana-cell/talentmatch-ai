@@ -11,7 +11,7 @@ export default function DatasetUpload({ onUploaded }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const CHUNK_MIN_SIZE = 512 * 1024; // upload in 512KB text chunks where possible
+const CHUNK_MIN_SIZE = 4 * 1024 * 1024; // upload in text chunks where possible
 
   const postChunk = async (uploadId: string, chunkIndex: number, chunkText: string, isFinal: boolean, fileName: string) => {
     const res = await fetch('/api/upload-jsonl', {
