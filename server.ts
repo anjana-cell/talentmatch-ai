@@ -78,6 +78,63 @@ let lastTopResults: any[] = [];
 // Cache for candidate embedding vectors in memory: candidateId -> number[]
 const candidateEmbeddingsCache = new Map<string, number[]>();
 
+interface UploadSession {
+  uploadId: string;
+  fileName: string;
+  nextChunkIndex: number;
+  importedCount: number;
+  invalidCount: number;
+  sampleValid: Candidate[];
+  sampleInvalid: any[];
+  newCandidates: Candidate[];
+  aborted: boolean;
+  startedAt: number;
+}
+
+const uploadSessions = new Map<string, UploadSession>();
+
+function createUploadSession(uploadId: string, fileName: string): UploadSession {
+  const session: UploadSession = {
+    uploadId,
+    fileName,
+    nextChunkIndex: 0,
+    importedCount: 0,
+    invalidCount: 0,
+    sampleValid: [],
+    sampleInvalid: [],
+    newCandidates: [],
+    aborted: false,
+    startedAt: Date.now(),
+  };
+  uploadSessions.set(uploadId, session);
+  return session;
+}
+
+function getUploadSession(uploadId: string, fileName: string): UploadSession {
+  const existing = uploadSessions.get(uploadId);
+  if (existing) return existing;
+  return createUploadSession(uploadId, fileName);
+}
+
+function cleanupUploadSession(uploadId: string) {
+  uploadSessions.delete(uploadId);
+}
+
+function abortUploadSession(session: UploadSession, reason: string) {
+  if (session.aborted) return;
+  session.aborted = true;
+  const durationMs = Date.now() - session.startedAt;
+  console.warn('Upload session aborted:', { uploadId: session.uploadId, reason, durationMs, importedCount: session.importedCount, invalidCount: session.invalidCount });
+  cleanupUploadSession(session.uploadId);
+}
+
+function commitUploadSession(session: UploadSession) {
+  candidatesList = session.newCandidates;
+  candidateEmbeddingsCache.clear();
+  lastTopResults = [];
+  cleanupUploadSession(session.uploadId);
+}
+
 // Helper function to combine each candidate's key text fields into a single rich string
 function getCandidateText(c: Candidate): string {
   const parts: string[] = [];
@@ -238,12 +295,6 @@ app.get("/api/candidates", (req, res) => {
 app.post("/api/upload-jsonl", (req, res) => {
   const routeName = '/api/upload-jsonl';
   const uploadStart = Date.now();
-  let importedCount = 0;
-  let invalidCount = 0;
-  const sampleInvalid: any[] = [];
-  const sampleValid: Candidate[] = [];
-  const newCandidates: Candidate[] = [];
-  let aborted = false;
   let completed = false;
   let responseSent = false;
 
@@ -256,20 +307,46 @@ app.post("/api/upload-jsonl", (req, res) => {
     res.status(status).json(payload);
   };
 
-  console.log('Upload started:', { route: routeName, startedAt: new Date().toISOString() });
+  const uploadIdHeader = String(req.headers['x-upload-id'] ?? '');
+  const chunkIndexHeader = req.headers['x-upload-chunk-index'];
+  const isFinalChunk = String(req.headers['x-upload-final'] ?? '').toLowerCase() === 'true';
+  const fileNameHeader = String(req.headers['x-file-name'] ?? 'upload.jsonl');
+  const isChunked = uploadIdHeader !== '' && chunkIndexHeader !== undefined;
+  const chunkIndex = isChunked ? Number(chunkIndexHeader) : 0;
+
+  if (isChunked && (!uploadIdHeader || Number.isNaN(chunkIndex) || chunkIndex < 0)) {
+    return safeSend(400, { error: 'Invalid chunk upload metadata.' });
+  }
+
+  const session = isChunked
+    ? getUploadSession(uploadIdHeader, fileNameHeader)
+    : createUploadSession(`single-${Date.now()}-${Math.random()}`, fileNameHeader);
+
+  if (session.aborted) {
+    return safeSend(499, { error: 'Previous upload session was aborted.' });
+  }
+
+  if (isChunked && chunkIndex !== session.nextChunkIndex) {
+    return safeSend(409, { error: `Unexpected chunk index: ${chunkIndex}. Expected ${session.nextChunkIndex}.` });
+  }
 
   const logUploadSummary = (event: string) => {
     const durationMs = Date.now() - uploadStart;
     console.log(`Upload ${event}:`, {
       route: routeName,
+      uploadId: session.uploadId,
+      chunkIndex: isChunked ? chunkIndex : undefined,
+      isFinalChunk,
       durationMs,
-      importedCount,
-      invalidCount,
-      totalLines: importedCount + invalidCount,
-      sampleValidCount: sampleValid.length,
-      sampleInvalidCount: sampleInvalid.length,
+      importedCount: session.importedCount,
+      invalidCount: session.invalidCount,
+      totalLines: session.importedCount + session.invalidCount,
+      sampleValidCount: session.sampleValid.length,
+      sampleInvalidCount: session.sampleInvalid.length,
     });
   };
+
+  console.log('Upload started:', { route: routeName, uploadId: session.uploadId, chunkIndex, isFinalChunk, startedAt: new Date(uploadStart).toISOString() });
 
   const cleanup = () => {
     if (completed) return;
@@ -282,53 +359,65 @@ app.post("/api/upload-jsonl", (req, res) => {
     req.removeListener('error', onRequestError);
   };
 
-  const abortUpload = (reason: string) => {
-    if (aborted || completed) return;
-    aborted = true;
-    logUploadSummary(`aborted (${reason})`);
-    cleanup();
-  };
-
   const onLine = (line: string) => {
-    if (aborted) return;
+    if (session.aborted) return;
     const trimmed = line.trim();
     if (!trimmed) return;
     try {
       const result = rankingService.parseJsonlLine(trimmed);
       if (result.valid && result.candidate) {
-        newCandidates.push(result.candidate);
-        importedCount += 1;
-        if (sampleValid.length < 5) sampleValid.push(result.candidate);
+        session.newCandidates.push(result.candidate);
+        session.importedCount += 1;
+        if (session.sampleValid.length < 5) session.sampleValid.push(result.candidate);
       } else {
-        invalidCount += 1;
-        if (sampleInvalid.length < 5) sampleInvalid.push(result.invalid);
+        session.invalidCount += 1;
+        if (session.sampleInvalid.length < 5) session.sampleInvalid.push(result.invalid);
       }
     } catch (err: any) {
-      invalidCount += 1;
-      if (sampleInvalid.length < 5) sampleInvalid.push({ line: trimmed, error: err?.message || 'Invalid JSONL line' });
+      session.invalidCount += 1;
+      if (session.sampleInvalid.length < 5) session.sampleInvalid.push({ line: trimmed, error: err?.message || 'Invalid JSONL line' });
     }
   };
 
   const onClose = () => {
     if (completed) return;
     cleanup();
-    if (aborted) {
+
+    if (session.aborted) {
       return;
     }
 
-    logUploadSummary('completed');
-    candidatesList = newCandidates;
-    candidateEmbeddingsCache.clear();
-    lastTopResults = [];
-    const response = { importedCount, invalidCount, sampleValid, sampleInvalid };
-    sendJson(res, response, routeName);
+    session.nextChunkIndex += 1;
+    logUploadSummary(isFinalChunk ? 'completed' : 'chunk-received');
+
+    if (isFinalChunk || !isChunked) {
+      commitUploadSession(session);
+      const response = {
+        importedCount: session.importedCount,
+        invalidCount: session.invalidCount,
+        sampleValid: session.sampleValid,
+        sampleInvalid: session.sampleInvalid,
+      };
+      sendJson(res, response, routeName);
+      return;
+    }
+
+    sendJson(res, {
+      uploadId: session.uploadId,
+      chunkIndex,
+      importedCount: session.importedCount,
+      invalidCount: session.invalidCount,
+      sampleValid: session.sampleValid,
+      sampleInvalid: session.sampleInvalid,
+    }, routeName);
   };
 
   const onReadlineError = (err: Error) => {
     if (completed) return;
     cleanup();
     console.error('Upload readline error:', err);
-    if (!aborted) {
+    abortUploadSession(session, 'readline-error');
+    if (!responseSent) {
       safeSend(500, { error: 'Failed to process upload stream.' });
     }
   };
@@ -337,17 +426,22 @@ app.post("/api/upload-jsonl", (req, res) => {
     if (completed) return;
     cleanup();
     console.error('Upload request error:', err);
-    if (!aborted) {
+    abortUploadSession(session, 'request-error');
+    if (!responseSent) {
       safeSend(500, { error: 'Failed to process upload request.' });
     }
   };
 
   const onAborted = () => {
-    abortUpload('aborted');
+    abortUploadSession(session, 'aborted');
+    cleanup();
   };
 
   const onRequestClose = () => {
-    abortUpload('close');
+    if (!completed && !session.aborted) {
+      abortUploadSession(session, 'close');
+      cleanup();
+    }
   };
 
   const rl = readline.createInterface({ input: req, crlfDelay: Infinity });
