@@ -16,9 +16,14 @@ dotenv.config();
 
 const app = express();
 const PORT = 3000;
+app.disable("x-powered-by");
 
-// Body parser (JSON only; upload route uses stream parsing)
-app.use(express.json({ limit: "50mb" }));
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled promise rejection:', reason, promise);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
 
 // Load official candidate dataset from JSON
 function loadCandidateDataset(): Candidate[] {
@@ -139,6 +144,11 @@ function withTimeout(promise: Promise<any>, timeoutMs: number, errorMessage: str
 }
 
 function sendJson(res: express.Response, payload: any, routeName: string) {
+  if (res.headersSent) {
+    console.warn(`Skipping duplicate response for ${routeName}.`);
+    return;
+  }
+
   try {
     const sizeMB = Buffer.byteLength(JSON.stringify(payload), 'utf8') / 1024 / 1024;
     console.log(`Response size: ${sizeMB.toFixed(3)} MB`, routeName);
@@ -226,52 +236,127 @@ app.get("/api/candidates", (req, res) => {
 
 // POST /api/upload-jsonl - Accept raw JSONL content in request body as a stream
 app.post("/api/upload-jsonl", (req, res) => {
-  try {
-    let importedCount = 0;
-    let invalidCount = 0;
-    const sampleInvalid: any[] = [];
-    const sampleValid: Candidate[] = [];
-    const newCandidates: Candidate[] = [];
+  const routeName = '/api/upload-jsonl';
+  const uploadStart = Date.now();
+  let importedCount = 0;
+  let invalidCount = 0;
+  const sampleInvalid: any[] = [];
+  const sampleValid: Candidate[] = [];
+  const newCandidates: Candidate[] = [];
+  let aborted = false;
+  let completed = false;
+  let responseSent = false;
 
-    console.time('Dataset parsing');
-    const rl = readline.createInterface({ input: req, crlfDelay: Infinity });
+  const safeSend = (status: number, payload: any) => {
+    if (responseSent || res.headersSent) {
+      console.warn(`Skipping duplicate response for ${routeName}.`);
+      return;
+    }
+    responseSent = true;
+    res.status(status).json(payload);
+  };
 
-    rl.on('line', (line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return;
-      try {
-        const result = rankingService.parseJsonlLine(trimmed);
-        if (result.valid && result.candidate) {
-          newCandidates.push(result.candidate);
-          importedCount += 1;
-          if (sampleValid.length < 5) sampleValid.push(result.candidate);
-        } else {
-          invalidCount += 1;
-          if (sampleInvalid.length < 5) sampleInvalid.push(result.invalid);
-        }
-      } catch (err) {
+  console.log('Upload started:', { route: routeName, startedAt: new Date().toISOString() });
+
+  const logUploadSummary = (event: string) => {
+    const durationMs = Date.now() - uploadStart;
+    console.log(`Upload ${event}:`, {
+      route: routeName,
+      durationMs,
+      importedCount,
+      invalidCount,
+      totalLines: importedCount + invalidCount,
+      sampleValidCount: sampleValid.length,
+      sampleInvalidCount: sampleInvalid.length,
+    });
+  };
+
+  const cleanup = () => {
+    if (completed) return;
+    completed = true;
+    rl.removeListener('line', onLine);
+    rl.removeListener('close', onClose);
+    rl.removeListener('error', onReadlineError);
+    req.removeListener('aborted', onAborted);
+    req.removeListener('close', onRequestClose);
+    req.removeListener('error', onRequestError);
+  };
+
+  const abortUpload = (reason: string) => {
+    if (aborted || completed) return;
+    aborted = true;
+    logUploadSummary(`aborted (${reason})`);
+    cleanup();
+  };
+
+  const onLine = (line: string) => {
+    if (aborted) return;
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    try {
+      const result = rankingService.parseJsonlLine(trimmed);
+      if (result.valid && result.candidate) {
+        newCandidates.push(result.candidate);
+        importedCount += 1;
+        if (sampleValid.length < 5) sampleValid.push(result.candidate);
+      } else {
         invalidCount += 1;
-        if (sampleInvalid.length < 5) sampleInvalid.push({ line: trimmed, error: (err as Error).message });
+        if (sampleInvalid.length < 5) sampleInvalid.push(result.invalid);
       }
-    });
+    } catch (err: any) {
+      invalidCount += 1;
+      if (sampleInvalid.length < 5) sampleInvalid.push({ line: trimmed, error: err?.message || 'Invalid JSONL line' });
+    }
+  };
 
-    rl.on('close', () => {
-      console.timeEnd('Dataset parsing');
-      candidatesList = newCandidates;
-      candidateEmbeddingsCache.clear();
-      lastTopResults = [];
-      const response = { importedCount, invalidCount, sampleValid, sampleInvalid };
-      sendJson(res, response, '/api/upload-jsonl');
-    });
+  const onClose = () => {
+    if (completed) return;
+    cleanup();
+    if (aborted) {
+      return;
+    }
 
-    req.on('error', (err) => {
-      console.error('Upload stream error:', err);
-      res.status(500).json({ error: 'Failed to process upload stream.' });
-    });
-  } catch (err: any) {
-    console.error('Upload parse error:', err);
-    res.status(500).json({ error: err.message || 'Failed to parse uploaded JSONL.' });
-  }
+    logUploadSummary('completed');
+    candidatesList = newCandidates;
+    candidateEmbeddingsCache.clear();
+    lastTopResults = [];
+    const response = { importedCount, invalidCount, sampleValid, sampleInvalid };
+    sendJson(res, response, routeName);
+  };
+
+  const onReadlineError = (err: Error) => {
+    if (completed) return;
+    cleanup();
+    console.error('Upload readline error:', err);
+    if (!aborted) {
+      safeSend(500, { error: 'Failed to process upload stream.' });
+    }
+  };
+
+  const onRequestError = (err: Error) => {
+    if (completed) return;
+    cleanup();
+    console.error('Upload request error:', err);
+    if (!aborted) {
+      safeSend(500, { error: 'Failed to process upload request.' });
+    }
+  };
+
+  const onAborted = () => {
+    abortUpload('aborted');
+  };
+
+  const onRequestClose = () => {
+    abortUpload('close');
+  };
+
+  const rl = readline.createInterface({ input: req, crlfDelay: Infinity });
+  rl.on('line', onLine);
+  rl.on('close', onClose);
+  rl.on('error', onReadlineError);
+  req.on('aborted', onAborted);
+  req.on('close', onRequestClose);
+  req.on('error', onRequestError);
 });
 
 // POST /api/rank-top100 - Compute Top-100 ranking from current candidate pool
@@ -371,7 +456,7 @@ app.get('/api/export/csv', (req, res) => {
 });
 
 // POST /api/candidates - Add a new custom candidate profile
-app.post("/api/candidates", (req, res) => {
+app.post("/api/candidates", express.json({ limit: "50mb" }), (req, res) => {
   try {
     const { name, title, experienceYears, skills, education, location, email, phone, summary } = req.body;
 
@@ -444,6 +529,15 @@ app.post("/api/rank", async (req, res) => {
   });
 });
 
+// Express error handler for any route middleware failures
+app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Unhandled Express error:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(500).json({ error: 'Internal server error.' });
+});
+
 // Vite Middleware for dev or static files serving for production
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
@@ -462,7 +556,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`TalentMatch AI Server is listening at http://localhost:${PORT}`);
     // Start precalculating embeddings in background on startup
     precalculateCandidateEmbeddings().then(() => {
@@ -470,6 +564,11 @@ async function startServer() {
     }).catch((err) => {
       console.error("Startup precalculation failed:", err);
     });
+  });
+
+  server.on('error', (err) => {
+    console.error('Server failed to start:', err);
+    process.exit(1);
   });
 }
 
