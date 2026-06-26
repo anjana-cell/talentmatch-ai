@@ -14,13 +14,46 @@ export function parseJsonlLine(line: string): ParseJsonlResult {
   try {
     const raw = JSON.parse(line);
     const name = raw.profile?.anonymized_name || raw.name || raw.full_name || "Anonymized Candidate";
+
+    const skills = [] as string[];
+    if (Array.isArray(raw.skills)) {
+      for (const skill of raw.skills) {
+        if (typeof skill === 'string') {
+          if (skill) skills.push(skill);
+        } else if (skill && typeof skill === 'object') {
+          if (typeof skill.name === 'string' && skill.name) {
+            skills.push(skill.name);
+          }
+        }
+      }
+    }
+
+    let education = "N/A";
+    if (Array.isArray(raw.education)) {
+      const educationParts: string[] = [];
+      for (const edu of raw.education) {
+        if (edu && typeof edu === 'object') {
+          if (typeof edu.degree === 'string' && edu.degree) {
+            educationParts.push(`${edu.degree} in ${edu.field_of_study || ''}`.trim());
+          }
+        } else if (typeof edu === 'string' && edu) {
+          educationParts.push(edu);
+        }
+      }
+      if (educationParts.length > 0) {
+        education = educationParts.join('; ');
+      }
+    } else if (typeof raw.education === 'string' && raw.education.trim()) {
+      education = raw.education;
+    }
+
     const candidate: Candidate = {
-      id: raw.candidate_id || raw.id || `cand-${Date.now()}-${Math.floor(Math.random()*10000)}`,
+      id: raw.candidate_id || raw.id || `cand-${Math.random().toString(36).slice(2)}`,
       name,
       title: raw.profile?.headline || raw.title || raw.role || "Unknown",
       experienceYears: Number(raw.profile?.years_of_experience ?? raw.experienceYears ?? 0),
-      skills: Array.isArray(raw.skills) ? raw.skills.map((s: any) => typeof s === 'string' ? s : (s.name || JSON.stringify(s))).filter(Boolean) : [],
-      education: Array.isArray(raw.education) ? raw.education.map((e:any)=> e.degree? `${e.degree} in ${e.field_of_study||''}`: JSON.stringify(e)).join('; ') : (raw.education || "N/A"),
+      skills,
+      education,
       location: `${raw.profile?.location || raw.location || 'Remote'}`,
       email: raw.profile?.email || raw.email || `${name.toLowerCase().replace(/\s+/g, '.') }@talentmatch.ai`,
       phone: raw.profile?.phone || raw.phone || "",
