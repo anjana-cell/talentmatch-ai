@@ -44,3 +44,25 @@ export interface AnalyzeResponse {
   isFallback?: boolean;
   usedModelName?: string;
 }
+
+// New interfaces for the Redrob workflow
+export interface UploadPreview {
+  importedCount: number;
+  validCount: number;
+  invalidCount: number;
+  sampleValid?: Candidate[];
+  sampleInvalid?: any[];
+}
+
+export interface RankingRow {
+  candidate_id: string;
+  rank: number;
+  score: number; // integer 0..100
+  reasoning: string;
+}
+
+export interface ValidationReport {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}

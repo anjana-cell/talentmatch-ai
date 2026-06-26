@@ -24,16 +24,20 @@ import {
   FileText,
   Atom
 } from "lucide-react";
-import { Candidate, RankingResult, AnalyzeResponse } from "./types";
+import { Candidate, RankingResult, AnalyzeResponse, UploadPreview, RankingRow, ValidationReport } from "./types";
+import DatasetUpload from "./components/DatasetUpload";
+import TopResults from "./components/TopResults";
 import { JD_TEMPLATES } from "./templates";
 
 export default function App() {
   // Navigation & Core States
   const [activeTab, setActiveTab] = useState<"job-board" | "shortlist">("job-board");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidateTotal, setCandidateTotal] = useState<number>(0);
   const [jobDescription, setJobDescription] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [rankings, setRankings] = useState<RankingResult[]>([]);
+  const [auditInfo, setAuditInfo] = useState<{ uploaded: number; scored: number; ranked: number; exported: number | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isFallback, setIsFallback] = useState<boolean>(false);
   const [usedModelName, setUsedModelName] = useState<string>("");
@@ -73,12 +77,16 @@ export default function App() {
     fetchCandidates();
   }, []);
 
-  const fetchCandidates = async () => {
+  const [uploadPreview, setUploadPreview] = useState<UploadPreview | null>(null);
+  const [topRows, setTopRows] = useState<RankingRow[]>([]);
+
+  const fetchCandidates = async (page = 1, pageSize = 100) => {
     try {
-      const res = await fetch("/api/candidates");
+      const res = await fetch(`/api/candidates?page=${page}&pageSize=${pageSize}`);
       if (!res.ok) throw new Error("Failed to load candidates pool");
       const data = await res.json();
-      setCandidates(data);
+      setCandidates(data.candidates || []);
+      setCandidateTotal(Number(data.total ?? (data.candidates?.length ?? 0)));
     } catch (err: any) {
       setError(err.message || "Could not retrieve candidates pool.");
     }
@@ -195,7 +203,8 @@ export default function App() {
     setError(null);
 
     try {
-      const res = await fetch("/api/rank", {
+      // Use the new Top-100 ranking workflow endpoint
+      const res = await fetch("/api/rank-top100", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobDescription })
@@ -206,24 +215,48 @@ export default function App() {
         throw new Error(errorData.error || "AI Matching algorithm encountered an issue.");
       }
 
-      const data: AnalyzeResponse = await res.json();
-      setRankings(data.rankings);
-      setIsFallback(!!data.isFallback);
-      setUsedModelName(data.usedModelName || "");
-      
-      // Select the top candidate as default detail view if any
-      if (data.rankings.length > 0) {
-        setSelectedRanking(data.rankings[0]);
-      } else {
-        setSelectedRanking(null);
-      }
-      
+        const data = await res.json();
+      const rows: RankingRow[] = data.top100 || [];
+      const uploadedCount = Number(data.uploadedCandidates ?? data.audit?.uploaded ?? candidateTotal);
+      const scoredCount = Number(data.scoredCandidates ?? data.audit?.scored ?? rows.length);
+      const rankedCount = Number(data.rankedCandidates ?? data.audit?.ranked ?? rows.length);
+      setTopRows(rows);
+      setCandidateTotal(uploadedCount);
+      setAuditInfo({
+        uploaded: uploadedCount,
+        scored: scoredCount,
+        ranked: rankedCount,
+        exported: null
+      });
+      const mapped: RankingResult[] = rows.map(r => ({ candidate: candidates.find(c=>c.id===r.candidate_id) || { id: r.candidate_id, name: r.candidate_id, title: '', experienceYears: 0, skills: [], education: '', location: '', email: '', phone: '', summary: '' }, match: { candidateId: r.candidate_id, score: r.score, overallFit: r.reasoning, strengths: [], gaps: [], recommendation: '', interviewQuestions: [], fitScore: r.score } }));
+      setRankings(mapped);
+      if (mapped.length > 0) setSelectedRanking(mapped[0]);
       setActiveTab("shortlist");
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred during candidate matching analysis.");
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleUploadPreview = (preview: UploadPreview) => {
+    setUploadPreview(preview);
+    // Refresh candidate pool from server
+    fetchCandidates();
+  };
+
+  const handleValidate = async (rows: RankingRow[]) : Promise<ValidationReport> => {
+    const res = await fetch('/api/validate-submission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rows }) });
+    if (!res.ok) {
+      const d = await res.json().catch(()=>({ error: 'Validation request failed' }));
+      throw new Error(d.error || 'Validation failed');
+    }
+    return res.json();
+  };
+
+  const handleExport = () => {
+    // Trigger download from server
+    window.location.href = '/api/export/csv';
   };
 
   // Filtered candidate list based on search bar
@@ -393,7 +426,7 @@ export default function App() {
                 {/* Rank Button */}
                 <div className="pt-2 flex items-center justify-between">
                   <p className="text-xs text-slate-400 max-w-sm sm:max-w-md">
-                    Matches your JD against the active candidate pool of <strong className="text-slate-600">{candidates.length}</strong> profiles using deep contextual embedding and skills mapping.
+                    Matches your JD against the active candidate pool of <strong className="text-slate-600">{candidateTotal}</strong> profiles using deep contextual embedding and skills mapping.
                   </p>
                   
                   <button
@@ -438,12 +471,16 @@ export default function App() {
             {/* Right side: Active Candidates Database Manager */}
             <div className="lg:col-span-4 flex flex-col space-y-4">
               <div className="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col h-full overflow-hidden">
+                <div className="p-4 border-b border-slate-100">
+                  <DatasetUpload onUploaded={handleUploadPreview} />
+                </div>
+
                 
                 {/* Header of Database */}
                 <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4 text-slate-500" />
-                    <span className="font-bold text-slate-800 text-sm">Candidates Pool ({candidates.length})</span>
+                    <span className="font-bold text-slate-800 text-sm">Candidates Pool ({candidateTotal})</span>
                   </div>
                   
                   <button
@@ -568,8 +605,13 @@ export default function App() {
                     <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Matched Successfully</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                    Ranked <strong className="text-slate-700">{rankings.length} Candidates</strong> against the submitted parameters. Double-click any profile card to inspect detailed gap analysis and interview questions.
+                    Top candidates returned: <strong className="text-slate-700">{auditInfo?.ranked ?? rankings.length}</strong> from an uploaded pool of <strong className="text-slate-700">{auditInfo?.uploaded ?? candidateTotal}</strong> candidates. Double-click any profile card to inspect detailed gap analysis and interview questions.
                   </p>
+              {auditInfo && (
+                <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                  Uploaded Candidates: <strong>{auditInfo.uploaded}</strong> · Scored Candidates: <strong>{auditInfo.scored}</strong> · Top Candidates Returned: <strong>{auditInfo.ranked}</strong>. {auditInfo.uploaded === auditInfo.scored ? <span className="font-semibold text-emerald-700">✓ Full Dataset Ranking Verified</span> : <span className="font-semibold text-amber-700">Partial dataset check failed</span>}
+                </p>
+              )}
                 </div>
               </div>
 
@@ -598,6 +640,11 @@ export default function App() {
                   )}
                 </button>
               </div>
+            </div>
+
+            {/* Top 100 Table */}
+            <div>
+              <TopResults rows={topRows} onValidate={handleValidate} onExport={handleExport} />
             </div>
 
             {/* Main Ranking Split Dashboard */}
@@ -1177,7 +1224,7 @@ export default function App() {
       <footer className="mt-auto bg-white border-t border-slate-200 py-6" id="app-footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div>
-            &copy; 2026 TalentMatch AI. Active seed candidates count: <strong className="text-slate-500 font-medium">{candidates.length}</strong>.
+            &copy; 2026 TalentMatch AI. Active seed candidates count: <strong className="text-slate-500 font-medium">{candidateTotal}</strong>.
           </div>
           <div className="flex items-center space-x-4">
             <span className="flex items-center gap-1">
