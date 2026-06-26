@@ -11,22 +11,108 @@ export default function DatasetUpload({ onUploaded }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const CHUNK_MIN_SIZE = 512 * 1024; // upload in 512KB text chunks where possible
+
+  const postChunk = async (uploadId: string, chunkIndex: number, chunkText: string, isFinal: boolean, fileName: string) => {
+    const res = await fetch('/api/upload-jsonl', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        'x-upload-id': uploadId,
+        'x-upload-chunk-index': String(chunkIndex),
+        'x-upload-final': String(isFinal),
+        'x-file-name': fileName,
+      },
+      body: chunkText,
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Upload failed');
+    }
+    return res.json();
+  };
+
+  const blobToText = async (blob: Blob): Promise<string> => {
+    const buffer = await blob.arrayBuffer();
+    return new TextDecoder().decode(buffer);
+  };
+
+  const uploadFileStream = async (file: File) => {
+    const uploadId = crypto?.randomUUID?.() ?? `upload-${Date.now()}-${Math.floor(Math.random()*1e9)}`;
+    const decoder = new TextDecoder();
+    let remainder = '';
+    let chunkIndex = 0;
+    let finalResponse: any = null;
+
+    if (file.stream && typeof file.stream === 'function') {
+      const reader = file.stream().getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        remainder += decoder.decode(value, { stream: true });
+        while (remainder.length >= CHUNK_MIN_SIZE) {
+          const boundary = remainder.indexOf('\n', CHUNK_MIN_SIZE);
+          if (boundary === -1) break;
+          const chunkText = remainder.slice(0, boundary + 1);
+          remainder = remainder.slice(boundary + 1);
+          finalResponse = await postChunk(uploadId, chunkIndex, chunkText, false, file.name);
+          chunkIndex += 1;
+        }
+      }
+    } else if (file.slice) {
+      let offset = 0;
+      while (offset < file.size) {
+        const end = Math.min(offset + CHUNK_MIN_SIZE, file.size);
+        const chunkBlob = file.slice(offset, end);
+        const text = await blobToText(chunkBlob);
+        remainder += text;
+        while (remainder.length >= CHUNK_MIN_SIZE) {
+          const boundary = remainder.indexOf('\n', CHUNK_MIN_SIZE);
+          if (boundary === -1) break;
+          const chunkText = remainder.slice(0, boundary + 1);
+          remainder = remainder.slice(boundary + 1);
+          finalResponse = await postChunk(uploadId, chunkIndex, chunkText, false, file.name);
+          chunkIndex += 1;
+        }
+        offset = end;
+      }
+    } else {
+      const fullText = await file.text();
+      return await postChunk(uploadId, 0, fullText, true, file.name);
+    }
+
+    remainder += decoder.decode();
+    if (remainder.length > 0) {
+      finalResponse = await postChunk(uploadId, chunkIndex, remainder, true, file.name);
+    } else {
+      finalResponse = await postChunk(uploadId, chunkIndex, '', true, file.name);
+    }
+
+    return finalResponse;
+  };
+
   const handleFile = async (file: File | null) => {
     setError(null);
     if (!file) return;
     setFileName(file.name);
     setLoading(true);
     try {
-      const res = await fetch('/api/upload-jsonl', {
-        method: 'POST',
-        body: file,
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(()=> ({}));
-        throw new Error(data.error || 'Upload failed');
+      let responseData: any;
+      if (file.stream && typeof file.stream === 'function') {
+        responseData = await uploadFileStream(file);
+      } else {
+        const res = await fetch('/api/upload-jsonl', {
+          method: 'POST',
+          body: file,
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Upload failed');
+        }
+        responseData = await res.json();
       }
-      const data = await res.json();
-      onUploaded({ importedCount: data.importedCount, validCount: data.importedCount, invalidCount: data.invalidCount, sampleValid: data.sampleValid, sampleInvalid: data.sampleInvalid });
+      onUploaded({ importedCount: responseData.importedCount, validCount: responseData.importedCount, invalidCount: responseData.invalidCount, sampleValid: responseData.sampleValid, sampleInvalid: responseData.sampleInvalid });
     } catch (err: any) {
       setError(err.message || 'Failed to upload file');
     } finally {
