@@ -330,7 +330,7 @@ app.post("/api/upload-jsonl", (req, res) => {
     return safeSend(409, { error: `Unexpected chunk index: ${chunkIndex}. Expected ${session.nextChunkIndex}.` });
   }
 
-  const logUploadSummary = (event: string) => {
+  const logUploadSummary = (event: string, chunkDurationMs: number) => {
     const durationMs = Date.now() - uploadStart;
     console.log(`Upload ${event}:`, {
       route: routeName,
@@ -338,6 +338,7 @@ app.post("/api/upload-jsonl", (req, res) => {
       chunkIndex: isChunked ? chunkIndex : undefined,
       isFinalChunk,
       durationMs,
+      chunkDurationMs,
       importedCount: session.importedCount,
       invalidCount: session.invalidCount,
       totalLines: session.importedCount + session.invalidCount,
@@ -346,6 +347,9 @@ app.post("/api/upload-jsonl", (req, res) => {
     });
   };
 
+  const timerLabel = `upload-jsonl-${session.uploadId}-${chunkIndex}`;
+  const chunkStart = Date.now();
+  console.time(timerLabel);
   console.log('Upload started:', { route: routeName, uploadId: session.uploadId, chunkIndex, isFinalChunk, startedAt: new Date(uploadStart).toISOString() });
 
   const cleanup = () => {
@@ -363,6 +367,7 @@ app.post("/api/upload-jsonl", (req, res) => {
     if (session.aborted) return;
     const trimmed = line.trim();
     if (!trimmed) return;
+
     try {
       const result = rankingService.parseJsonlLine(trimmed);
       if (result.valid && result.candidate) {
@@ -387,9 +392,8 @@ app.post("/api/upload-jsonl", (req, res) => {
       return;
     }
 
+    const chunkDurationMs = Date.now() - chunkStart;
     session.nextChunkIndex += 1;
-    logUploadSummary(isFinalChunk ? 'completed' : 'chunk-received');
-
     if (isFinalChunk || !isChunked) {
       commitUploadSession(session);
       const response = {
@@ -399,6 +403,8 @@ app.post("/api/upload-jsonl", (req, res) => {
         sampleInvalid: session.sampleInvalid,
       };
       sendJson(res, response, routeName);
+      logUploadSummary('completed', chunkDurationMs);
+      console.timeEnd(timerLabel);
       return;
     }
 
@@ -407,9 +413,9 @@ app.post("/api/upload-jsonl", (req, res) => {
       chunkIndex,
       importedCount: session.importedCount,
       invalidCount: session.invalidCount,
-      sampleValid: session.sampleValid,
-      sampleInvalid: session.sampleInvalid,
     }, routeName);
+    logUploadSummary('chunk-received', chunkDurationMs);
+    console.timeEnd(timerLabel);
   };
 
   const onReadlineError = (err: Error) => {
@@ -417,6 +423,7 @@ app.post("/api/upload-jsonl", (req, res) => {
     cleanup();
     console.error('Upload readline error:', err);
     abortUploadSession(session, 'readline-error');
+    console.timeEnd(timerLabel);
     if (!responseSent) {
       safeSend(500, { error: 'Failed to process upload stream.' });
     }
@@ -427,6 +434,7 @@ app.post("/api/upload-jsonl", (req, res) => {
     cleanup();
     console.error('Upload request error:', err);
     abortUploadSession(session, 'request-error');
+    console.timeEnd(timerLabel);
     if (!responseSent) {
       safeSend(500, { error: 'Failed to process upload request.' });
     }
@@ -435,12 +443,14 @@ app.post("/api/upload-jsonl", (req, res) => {
   const onAborted = () => {
     abortUploadSession(session, 'aborted');
     cleanup();
+    console.timeEnd(timerLabel);
   };
 
   const onRequestClose = () => {
     if (!completed && !session.aborted) {
       abortUploadSession(session, 'close');
       cleanup();
+      console.timeEnd(timerLabel);
     }
   };
 
