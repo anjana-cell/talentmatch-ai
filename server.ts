@@ -261,11 +261,19 @@ app.get("/api/candidates", (req, res) => {
 });
 
 // POST /api/load-default-dataset - Activate preloaded default candidate dataset from memory
-app.post("/api/load-default-dataset", (req, res) => {
-  candidatesList = preloadedCandidates;
-  candidateEmbeddingsCache.clear();
-  lastTopResults = [];
-  res.json({ success: true, totalCandidates: preloadedCandidates.length });
+app.post('/api/load-default-dataset', (req, res) => {
+  try {
+    candidatesList = [...preloadedCandidates];
+    candidateEmbeddingCache = {};
+    lastTopResults = null;
+    return res.json({
+      success: true,
+      totalCandidates: candidatesList.length,
+      candidates: candidatesList
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // POST /api/upload-jsonl - Accept raw JSONL content in request body as a stream

@@ -257,8 +257,9 @@ export default function App() {
     setUploadPreview(null);
     setError(null);
 
-    if (Array.isArray(data.candidates) && data.candidates.length > 0) {
+    if (Array.isArray(data.candidates)) {
       setCandidates(data.candidates);
+      setCandidateTotal(total > 0 ? total : data.candidates.length);
       return;
     }
 
