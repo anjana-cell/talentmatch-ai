@@ -2,9 +2,14 @@ import React, { useState } from 'react';
 import { Upload, FileText, Database } from 'lucide-react';
 import { UploadPreview } from '../types';
 
+interface DefaultDatasetResponse {
+  totalCandidates: number;
+  candidates?: unknown[];
+}
+
 interface Props {
   onUploaded: (preview: UploadPreview) => void;
-  onDefaultLoaded: (total: number) => void;
+  onDefaultLoaded: (data: DefaultDatasetResponse) => void;
 }
 
 export default function DatasetUpload({ onUploaded, onDefaultLoaded }: Props) {
@@ -111,7 +116,10 @@ const CHUNK_MIN_SIZE = 4 * 1024 * 1024; // upload in text chunks where possible
       const total = Number(data.totalCandidates ?? 0);
       setDefaultLoaded(true);
       setDefaultTotal(total);
-      onDefaultLoaded(total);
+      onDefaultLoaded({
+        totalCandidates: total,
+        candidates: Array.isArray(data.candidates) ? data.candidates : undefined,
+      });
     } catch (err: any) {
       setDefaultError(err.message || 'Failed to load default dataset');
     } finally {

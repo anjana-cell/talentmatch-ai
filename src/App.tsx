@@ -85,8 +85,14 @@ export default function App() {
       const res = await fetch(`/api/candidates?page=${page}&pageSize=${pageSize}`);
       if (!res.ok) throw new Error("Failed to load candidates pool");
       const data = await res.json();
-      setCandidates(data.candidates || []);
-      setCandidateTotal(Number(data.total ?? (data.candidates?.length ?? 0)));
+      if (Array.isArray(data.candidates)) {
+        setCandidates(data.candidates);
+      }
+      if (data.total != null) {
+        setCandidateTotal(Number(data.total));
+      } else if (Array.isArray(data.candidates)) {
+        setCandidateTotal(data.candidates.length);
+      }
     } catch (err: any) {
       setError(err.message || "Could not retrieve candidates pool.");
     }
@@ -195,7 +201,7 @@ export default function App() {
       return;
     }
 
-    if (candidates.length === 0) {
+    if (candidateTotal === 0 && candidates.length === 0) {
       setError("Your candidate pool is empty. Please add candidates or reset to the pre-seeded pool.");
       return;
     }
@@ -245,10 +251,30 @@ export default function App() {
     fetchCandidates();
   };
 
-  const handleDefaultLoaded = (total: number) => {
+  const handleDefaultLoaded = async (data: { totalCandidates: number; candidates?: Candidate[] }) => {
+    const total = Number(data.totalCandidates ?? 0);
     setCandidateTotal(total);
     setUploadPreview(null);
-    fetchCandidates();
+    setError(null);
+
+    if (Array.isArray(data.candidates) && data.candidates.length > 0) {
+      setCandidates(data.candidates);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/candidates?page=1&pageSize=100`);
+      if (!res.ok) throw new Error("Failed to load candidates pool");
+      const pageData = await res.json();
+      if (Array.isArray(pageData.candidates)) {
+        setCandidates(pageData.candidates);
+      }
+      if (pageData.total != null) {
+        setCandidateTotal(Number(pageData.total));
+      }
+    } catch (err: any) {
+      setError(err.message || "Default dataset loaded, but candidate preview could not be fetched.");
+    }
   };
 
   const handleValidate = async (rows: RankingRow[]) : Promise<ValidationReport> => {
