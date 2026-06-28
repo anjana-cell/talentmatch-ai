@@ -28,40 +28,11 @@ process.on('uncaughtException', (err) => {
 // Load official candidate dataset from JSON
 function loadCandidateDataset(): Candidate[] {
   try {
-    const jsonPath = path.join(process.cwd(), "server", "candidateDataset.json");
-    if (fs.existsSync(jsonPath)) {
-      const fileContent = fs.readFileSync(jsonPath, "utf8");
-      const rawList = JSON.parse(fileContent);
-      if (Array.isArray(rawList)) {
-        return rawList.map((raw: any) => {
-          // Map education array of objects to readable single string
-          const eduStr = Array.isArray(raw.education) && raw.education.length > 0
-            ? raw.education.map((e: any) => `${e.degree} in ${e.field_of_study} at ${e.institution} (${e.start_year}-${e.end_year})`).join("; ")
-            : "N/A";
-            
-          // Map skills array of objects to array of string names
-          const skillsArray = Array.isArray(raw.skills)
-            ? raw.skills.map((s: any) => s.name)
-            : [];
-
-          const name = raw.profile?.anonymized_name || "Anonymized Candidate";
-          const email = name.toLowerCase().replace(/\s+/g, ".") + "@talentmatch.ai";
-
-          return {
-            id: raw.candidate_id || `cand-${Date.now()}-${Math.random()}`,
-            name,
-            title: raw.profile?.headline || raw.profile?.current_title || "Software Engineer",
-            experienceYears: raw.profile?.years_of_experience || 0,
-            skills: skillsArray,
-            education: eduStr,
-            location: `${raw.profile?.location || "Remote"}, ${raw.profile?.country || ""}`,
-            email: email,
-            phone: "+1 (555) 000-0000",
-            summary: raw.profile?.summary || "No resume summary provided.",
-            redrobData: raw // Save original rich Redrob structure so UI can render cool signals & history!
-          };
-        });
-      }
+    const jsonPath = path.join(process.cwd(), "data", "candidates.json");
+    const fileContent = fs.readFileSync(jsonPath, "utf8");
+    const parsed = JSON.parse(fileContent);
+    if (Array.isArray(parsed)) {
+      return parsed as Candidate[];
     }
   } catch (error) {
     console.error("Error reading candidate dataset, using initial candidates fallback:", error);
@@ -289,6 +260,14 @@ app.get("/api/candidates", (req, res) => {
   console.log('Response size:', sizeMB.toFixed(3), 'MB', 'GET /api/candidates');
   if (sizeMB > 5) console.warn('Large response (>5MB) for /api/candidates with pageSize', pageSize);
   res.json(response);
+});
+
+// POST /api/load-default-dataset - Reload default candidate dataset from data/candidates.json
+app.post("/api/load-default-dataset", (req, res) => {
+  candidatesList = loadCandidateDataset();
+  candidateEmbeddingsCache.clear();
+  lastTopResults = [];
+  res.json({ success: true, totalCandidates: candidatesList.length });
 });
 
 // POST /api/upload-jsonl - Accept raw JSONL content in request body as a stream

@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { Upload, FileText } from 'lucide-react';
+import { Upload, FileText, Database } from 'lucide-react';
 import { UploadPreview } from '../types';
 
 interface Props {
   onUploaded: (preview: UploadPreview) => void;
+  onDefaultLoaded: (total: number) => void;
 }
 
-export default function DatasetUpload({ onUploaded }: Props) {
+export default function DatasetUpload({ onUploaded, onDefaultLoaded }: Props) {
   const [fileName, setFileName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [defaultLoading, setDefaultLoading] = useState(false);
+  const [defaultLoaded, setDefaultLoaded] = useState(false);
+  const [defaultTotal, setDefaultTotal] = useState<number | null>(null);
+  const [defaultError, setDefaultError] = useState<string | null>(null);
 
 const CHUNK_MIN_SIZE = 4 * 1024 * 1024; // upload in text chunks where possible
 
@@ -92,6 +97,28 @@ const CHUNK_MIN_SIZE = 4 * 1024 * 1024; // upload in text chunks where possible
     return finalResponse;
   };
 
+  const handleLoadDefault = async () => {
+    setDefaultError(null);
+    setDefaultLoaded(false);
+    setDefaultLoading(true);
+    try {
+      const res = await fetch('/api/load-default-dataset', { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to load default dataset');
+      }
+      const data = await res.json();
+      const total = Number(data.totalCandidates ?? 0);
+      setDefaultLoaded(true);
+      setDefaultTotal(total);
+      onDefaultLoaded(total);
+    } catch (err: any) {
+      setDefaultError(err.message || 'Failed to load default dataset');
+    } finally {
+      setDefaultLoading(false);
+    }
+  };
+
   const handleFile = async (file: File | null) => {
     setError(null);
     if (!file) return;
@@ -121,30 +148,75 @@ const CHUNK_MIN_SIZE = 4 * 1024 * 1024; // upload in text chunks where possible
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-indigo-50 text-indigo-700 p-2 rounded">
-            <Upload className="w-5 h-5" />
+    <div className="space-y-4">
+      <div className="bg-gradient-to-br from-indigo-50 via-white to-slate-50 rounded-xl border border-indigo-100 p-4 shadow-xs">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
+              <Database className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-900">Default Dataset</h4>
+              <p className="text-xs text-slate-500">Load the bundled candidates from data/candidates.json.</p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold text-slate-900">Upload candidates.jsonl</h4>
-            <p className="text-xs text-slate-500">Upload newline-delimited JSON (Redrob export).</p>
-          </div>
+          <button
+            type="button"
+            onClick={handleLoadDefault}
+            disabled={defaultLoading}
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors shrink-0"
+          >
+            {defaultLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <Database className="w-4 h-4" />
+                <span>Load Default Dataset</span>
+              </>
+            )}
+          </button>
         </div>
-        <div>
-          <label className="cursor-pointer inline-flex items-center bg-slate-900 text-white px-3 py-2 rounded">
-            <input type="file" accept=".json,.jsonl,text/plain" className="hidden" onChange={(e)=> handleFile(e.target.files?.[0] ?? null)} />
-            <FileText className="w-4 h-4 mr-2" />
-            <span className="text-sm font-semibold">Select File</span>
-          </label>
+
+        <div className="mt-3 text-sm">
+          {defaultError && <div className="text-rose-600">{defaultError}</div>}
+          {defaultLoaded && !defaultError && (
+            <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+              <span>✓ Default Dataset Loaded</span>
+              <span className="text-slate-500 font-normal">·</span>
+              <span className="text-slate-700">{defaultTotal ?? 0} candidates</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="mt-3 text-sm">
-        {loading && <div className="text-indigo-600">Parsing upload...</div>}
-        {error && <div className="text-rose-600">{error}</div>}
-        {!loading && !error && fileName && <div className="text-slate-600">Selected: {fileName}</div>}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-50 text-indigo-700 p-2 rounded">
+              <Upload className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-900">Upload candidates.jsonl</h4>
+              <p className="text-xs text-slate-500">Upload newline-delimited JSON (Redrob export).</p>
+            </div>
+          </div>
+          <div>
+            <label className="cursor-pointer inline-flex items-center bg-slate-900 text-white px-3 py-2 rounded">
+              <input type="file" accept=".json,.jsonl,text/plain" className="hidden" onChange={(e)=> handleFile(e.target.files?.[0] ?? null)} />
+              <FileText className="w-4 h-4 mr-2" />
+              <span className="text-sm font-semibold">Select File</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-3 text-sm">
+          {loading && <div className="text-indigo-600">Parsing upload...</div>}
+          {error && <div className="text-rose-600">{error}</div>}
+          {!loading && !error && fileName && <div className="text-slate-600">Selected: {fileName}</div>}
+        </div>
       </div>
     </div>
   );

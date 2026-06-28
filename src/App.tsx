@@ -109,6 +109,7 @@ export default function App() {
       if (!res.ok) throw new Error("Failed to reset candidates database");
       const data = await res.json();
       setCandidates(data.candidates);
+      setCandidateTotal(Number(data.total ?? data.candidates?.length ?? 0));
       setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to reset candidate database.");
@@ -241,7 +242,12 @@ export default function App() {
 
   const handleUploadPreview = (preview: UploadPreview) => {
     setUploadPreview(preview);
-    // Refresh candidate pool from server
+    fetchCandidates();
+  };
+
+  const handleDefaultLoaded = (total: number) => {
+    setCandidateTotal(total);
+    setUploadPreview(null);
     fetchCandidates();
   };
 
@@ -426,7 +432,7 @@ export default function App() {
                 {/* Rank Button */}
                 <div className="pt-2 flex items-center justify-between">
                   <p className="text-xs text-slate-400 max-w-sm sm:max-w-md">
-                    Matches your JD against the active candidate pool of <strong className="text-slate-600">{candidateTotal}</strong> profiles using deep contextual embedding and skills mapping.
+                    Matches your JD against <strong className="text-slate-600">Total Candidates Loaded: {candidateTotal}</strong> using deep contextual embedding and skills mapping.
                   </p>
                   
                   <button
@@ -472,7 +478,7 @@ export default function App() {
             <div className="lg:col-span-4 flex flex-col space-y-4">
               <div className="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col h-full overflow-hidden">
                 <div className="p-4 border-b border-slate-100">
-                  <DatasetUpload onUploaded={handleUploadPreview} />
+                  <DatasetUpload onUploaded={handleUploadPreview} onDefaultLoaded={handleDefaultLoaded} />
                 </div>
 
                 
@@ -480,7 +486,7 @@ export default function App() {
                 <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4 text-slate-500" />
-                    <span className="font-bold text-slate-800 text-sm">Candidates Pool ({candidateTotal})</span>
+                    <span className="font-bold text-slate-800 text-sm">Total Candidates Loaded: {candidateTotal}</span>
                   </div>
                   
                   <button
@@ -605,11 +611,11 @@ export default function App() {
                     <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Matched Successfully</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                    Top candidates returned: <strong className="text-slate-700">{auditInfo?.ranked ?? rankings.length}</strong> from an uploaded pool of <strong className="text-slate-700">{auditInfo?.uploaded ?? candidateTotal}</strong> candidates. Double-click any profile card to inspect detailed gap analysis and interview questions.
+                    Top 100 ranked candidates from <strong className="text-slate-700">Total Candidates Loaded: {auditInfo?.uploaded ?? candidateTotal}</strong>. Double-click any profile card to inspect detailed gap analysis and interview questions.
                   </p>
               {auditInfo && (
                 <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                  Uploaded Candidates: <strong>{auditInfo.uploaded}</strong> · Scored Candidates: <strong>{auditInfo.scored}</strong> · Top Candidates Returned: <strong>{auditInfo.ranked}</strong>. {auditInfo.uploaded === auditInfo.scored ? <span className="font-semibold text-emerald-700">✓ Full Dataset Ranking Verified</span> : <span className="font-semibold text-amber-700">Partial dataset check failed</span>}
+                  Total Candidates Loaded: <strong>{auditInfo.uploaded}</strong> · Scored Candidates: <strong>{auditInfo.scored}</strong> · Top 100 Ranked Candidates: <strong>{auditInfo.ranked}</strong>. {auditInfo.uploaded === auditInfo.scored ? <span className="font-semibold text-emerald-700">✓ Full Dataset Ranking Verified</span> : <span className="font-semibold text-amber-700">Partial dataset check failed</span>}
                 </p>
               )}
                 </div>
@@ -1224,7 +1230,7 @@ export default function App() {
       <footer className="mt-auto bg-white border-t border-slate-200 py-6" id="app-footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div>
-            &copy; 2026 TalentMatch AI. Active seed candidates count: <strong className="text-slate-500 font-medium">{candidateTotal}</strong>.
+            &copy; 2026 TalentMatch AI. Total Candidates Loaded: <strong className="text-slate-500 font-medium">{candidateTotal}</strong>.
           </div>
           <div className="flex items-center space-x-4">
             <span className="flex items-center gap-1">
