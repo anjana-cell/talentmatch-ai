@@ -11,6 +11,19 @@ import * as rankingService from "./server/rankingService";
 import validationService from "./server/validationService";
 import exportService from "./server/exportService";
 
+let preloadedCandidates: Candidate[] = [];
+
+try {
+  const fileContent = fs.readFileSync("data/candidates.json", "utf8");
+  const parsed = JSON.parse(fileContent);
+  if (Array.isArray(parsed)) {
+    preloadedCandidates = parsed as Candidate[];
+    console.log(`Preloaded ${preloadedCandidates.length} candidates into memory.`);
+  }
+} catch (error) {
+  console.error("Error preloading candidate dataset from data/candidates.json:", error);
+}
+
 // Load environment variables
 dotenv.config();
 
@@ -25,23 +38,8 @@ process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
 });
 
-// Load official candidate dataset from JSON
-function loadCandidateDataset(): Candidate[] {
-  try {
-    const jsonPath = path.join(process.cwd(), "data", "candidates.json");
-    const fileContent = fs.readFileSync(jsonPath, "utf8");
-    const parsed = JSON.parse(fileContent);
-    if (Array.isArray(parsed)) {
-      return parsed as Candidate[];
-    }
-  } catch (error) {
-    console.error("Error reading candidate dataset, using initial candidates fallback:", error);
-  }
-  return [...initialCandidates];
-}
-
-// In-memory candidate storage (initialized with the loaded Redrob candidates)
-let candidatesList: Candidate[] = loadCandidateDataset();
+// In-memory candidate storage (initialized from preloaded pool or seed fallback)
+let candidatesList: Candidate[] = preloadedCandidates.length > 0 ? preloadedCandidates : [...initialCandidates];
 
 // Last generated Top results (for quick export)
 let lastTopResults: any[] = [];
@@ -262,12 +260,12 @@ app.get("/api/candidates", (req, res) => {
   res.json(response);
 });
 
-// POST /api/load-default-dataset - Reload default candidate dataset from data/candidates.json
+// POST /api/load-default-dataset - Activate preloaded default candidate dataset from memory
 app.post("/api/load-default-dataset", (req, res) => {
-  candidatesList = loadCandidateDataset();
+  candidatesList = preloadedCandidates;
   candidateEmbeddingsCache.clear();
   lastTopResults = [];
-  res.json({ success: true, totalCandidates: candidatesList.length });
+  res.json({ success: true, totalCandidates: preloadedCandidates.length });
 });
 
 // POST /api/upload-jsonl - Accept raw JSONL content in request body as a stream
@@ -469,14 +467,10 @@ app.post("/api/rank-top100", express.json({ limit: '5mb' }), async (req, res) =>
     console.timeEnd('Candidate sorting');
 
     console.time('TopK selection');
-    const top = rankingService.selectTopK(sortedScored, 100);
+    const top = sortedScored.slice(0, 100).map((item, idx) => ({ ...item, rank: idx + 1 }));
     console.timeEnd('TopK selection');
     const topCount = top.length;
     console.log('Candidates Ranked:', topCount);
-
-    if (topCount !== 100) {
-      throw new Error(`Top-K selection returned ${topCount} candidates instead of 100.`);
-    }
 
     const response = {
       uploadedCandidates: uploadedCount,
@@ -580,9 +574,9 @@ app.delete("/api/candidates/:id", (req, res) => {
   res.json({ success: true, removed: removed[0] });
 });
 
-// POST /api/candidates/reset - Reset candidates to original seed list
+// POST /api/candidates/reset - Reset candidates to preloaded default pool
 app.post("/api/candidates/reset", (req, res) => {
-  candidatesList = loadCandidateDataset();
+  candidatesList = preloadedCandidates.length > 0 ? preloadedCandidates : [...initialCandidates];
   candidateEmbeddingsCache.clear();
   const pageSize = 20;
   const response = {
